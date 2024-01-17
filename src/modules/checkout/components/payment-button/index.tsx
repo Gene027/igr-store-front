@@ -30,9 +30,9 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ paymentSession }) => {
       )
     case "manual":
       return <ManualTestPaymentButton notReady={notReady} />
-    case "paystack-payment":
+    case "paystack":
       return <PaystackPaymentButton notReady={notReady} session={paymentSession} />
-    case "wallet-payment":
+    case "wallet":
       return <WalletPaymentButton notReady={notReady} />
     case "paypal":
       return (
@@ -202,6 +202,8 @@ const PayPalPaymentButton = ({
 
 const PaystackPaymentButton = ({ notReady, session }: { session: any, notReady: boolean }) => {
   const [submitting, setSubmitting] = useState(false)
+  const [notPaid, setNotPaid] = useState(true)
+
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   )
@@ -210,28 +212,37 @@ const PaystackPaymentButton = ({ notReady, session }: { session: any, notReady: 
 
   const handlePayment = () => {
     setSubmitting(true)
-    try {
-      window.open(session.data?.paystackTxAuthData?.authorization_url,'_blank');
-      
-    } catch (error) {
-      console.log(error)
-      return
-    }
 
     onPaymentCompleted()
 
     setSubmitting(false)
   }
 
+  const handlePaystackPayment = () => {
+    window.open(session.data?.paystackTxAuthData?.authorization_url,'_blank');
+    setNotPaid(false)
+  }
+
   return (
+    <div className="flex flex-col gap-3">
     <Button
       disabled={notReady}
+      isLoading={submitting}
+      onClick={handlePaystackPayment}
+      size="large"
+    >
+      Continue Payment
+    </Button>
+    
+    <Button
+      disabled={notReady || notPaid}
       isLoading={submitting}
       onClick={handlePayment}
       size="large"
     >
       Place order
     </Button>
+    </div>
   )
 }
 
